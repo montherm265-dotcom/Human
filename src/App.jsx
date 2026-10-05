@@ -5,9 +5,10 @@ import { queryClient } from '@/lib/queryClient';
 import { AuthProvider } from '@/context/AuthContext';
 import RequireAuth from '@/components/RequireAuth';
 import Layout from '@/components/Layout';
-import Feed from '@/pages/Feed';
+import Discover from '@/pages/Discover';
 
 const Auth = lazy(() => import('@/pages/Auth'));
+const Feed = lazy(() => import('@/pages/Feed'));
 const Live = lazy(() => import('@/pages/Live'));
 const Post = lazy(() => import('@/pages/Post'));
 const Profile = lazy(() => import('@/pages/Profile'));
@@ -22,7 +23,8 @@ export default function App() {
             <Routes>
               <Route path="/auth" element={<Auth />} />
               <Route element={<Layout />}>
-                <Route path="/" element={<Feed />} />
+                <Route path="/" element={<Discover />} />
+                <Route path="/watch" element={<Feed />} />
                 <Route path="/live" element={<Live />} />
                 <Route path="/post" element={<RequireAuth><Post /></RequireAuth>} />
                 <Route path="/profile/:username" element={<Profile />} />

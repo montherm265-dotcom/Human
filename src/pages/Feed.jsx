@@ -1,17 +1,19 @@
 import { useEffect, useRef, useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { Heart, MessageCircle, UserPlus, UserCheck, Volume2, VolumeX } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/context/AuthContext';
 
-function useVideoFeed() {
+function useVideoFeed(pinned) {
   return useQuery({
     queryKey: ['feed'],
     queryFn: async () => {
       const { data, error } = await supabase.rpc('get_video_feed', { p_limit: 20 });
       if (error) throw error;
-      return data ?? [];
+      const rest = (data ?? []).filter((v) => v.id !== pinned?.id);
+      return pinned ? [pinned, ...rest] : rest;
     },
   });
 }
@@ -118,7 +120,9 @@ function VideoCard({ video, isActive, muted, onToggleMute }) {
 }
 
 export default function Feed() {
-  const { data: videos, isLoading, isError } = useVideoFeed();
+  const location = useLocation();
+  const pinned = location.state?.entryVideo;
+  const { data: videos, isLoading, isError } = useVideoFeed(pinned);
   const [activeId, setActiveId] = useState(null);
   const [muted, setMuted] = useState(true);
   const containerRef = useRef(null);
@@ -147,9 +151,10 @@ export default function Feed() {
   if (isError) return <div className="flex h-screen items-center justify-center text-muted-foreground">Couldn't load the feed.</div>;
   if (!videos?.length) {
     return (
-      <div className="flex h-screen flex-col items-center justify-center gap-2 text-center text-muted-foreground">
-        <p className="font-display text-lg font-semibold text-foreground">No videos yet</p>
-        <p className="text-sm">Be the first to post something.</p>
+      <div className="flex h-screen flex-col items-center justify-center gap-4 text-center">
+        <p className="font-display text-xl font-bold">Nothing here yet — be the first</p>
+        <p className="max-w-xs text-sm text-muted-foreground">Every world starts with one person. Post the first video and you're it.</p>
+        <Link to="/post" className="btn-primary">Post the first video</Link>
       </div>
     );
   }

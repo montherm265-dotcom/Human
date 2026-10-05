@@ -3,7 +3,7 @@ import { Home, Radio, PlusSquare, User } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 
 const TABS = [
-  { to: '/', label: 'Feed', icon: Home },
+  { to: '/', label: 'Home', icon: Home },
   { to: '/live', label: 'Live', icon: Radio },
   { to: '/post', label: 'Post', icon: PlusSquare },
 ];
