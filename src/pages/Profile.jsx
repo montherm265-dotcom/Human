@@ -1,7 +1,7 @@
 import { useParams } from 'react-router-dom';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { useState } from 'react';
-import { Play } from 'lucide-react';
+import { Play, Sparkles } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/context/AuthContext';
 
@@ -14,6 +14,16 @@ export default function Profile() {
     queryKey: ['profile', username],
     queryFn: async () => {
       const { data, error } = await supabase.from('profiles').select('*').eq('username', username).maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const { data: reputation } = useQuery({
+    queryKey: ['profile-reputation', profile?.id],
+    enabled: !!profile?.id,
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('get_profile_reputation', { p_profile_id: profile.id });
       if (error) throw error;
       return data;
     },
@@ -59,6 +69,11 @@ export default function Profile() {
           <p className="font-display text-xl font-bold">{profile.display_name}</p>
           <p className="text-sm text-muted-foreground">@{profile.username}</p>
         </div>
+        {reputation?.highlight && (
+          <span className="inline-flex items-center gap-1 rounded-full bg-primary/15 px-3 py-1 text-xs font-semibold text-primary">
+            <Sparkles className="h-3 w-3" /> {reputation.highlight}
+          </span>
+        )}
         {profile.bio && <p className="max-w-sm text-sm text-muted-foreground">{profile.bio}</p>}
         {!isOwnProfile && (
           <button onClick={() => followMutation.mutate()} className="btn-primary">
