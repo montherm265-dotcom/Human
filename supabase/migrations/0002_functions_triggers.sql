@@ -163,7 +163,11 @@ begin
   return v_row;
 end;
 $$;
-revoke execute on function public.mark_live_stream_live(uuid, text, text, text) from anon, authenticated;
+-- Postgres grants EXECUTE to the PUBLIC pseudo-role by default on function
+-- creation; every role implicitly has whatever PUBLIC is granted
+-- regardless of its own specific grants, so PUBLIC is what must be
+-- revoked here, not anon/authenticated individually.
+revoke execute on function public.mark_live_stream_live(uuid, text, text, text) from public;
 
 create or replace function public.end_live_stream(p_stream_id uuid)
 returns public.live_streams
